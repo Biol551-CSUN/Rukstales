@@ -1,2 +1,9 @@
-# Rukstales
-Repo for Emily Rukstales
+## Emily Rukstales's Repository for BIOL 551
+
+This repository was created for use in the Spring 2021 Computer Modeling course at CSUN. It contains data, scripts, and class assignments.
+
+#### Folders
+
+Week_2
+* contains the first R script we wrote in class
+* contains sample data
