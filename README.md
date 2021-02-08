@@ -1,6 +1,6 @@
 ## Emily Rukstales's BIOL 551 Repository
 
-This repository was created for use in the Spring 2021 Computer Modeling course at CSUN. It contains data, scripts, and class assignments.
+This repository is for the Spring 2021 Computer Modeling course at CSUN with Dr. Nyssa Silbiger. It includes data, scripts, and class assignments.
 
 #### Folders:
 
