@@ -36,4 +36,4 @@ ggplot(penguins,
   geom_point() +
   scale_color_viridis_d() +
   facet_grid(species~sex) + #facet_grid makes everything a square, facet_wrap allows for more manipulation
-  guides(color = FALSE)
+  guides(color = FALSE) #gets ride of redundant color legend
