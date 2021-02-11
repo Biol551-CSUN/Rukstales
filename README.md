@@ -7,3 +7,6 @@ This repository is for the Spring 2021 Computer Modeling course at CSUN with Dr.
 [Week_2](https://github.com/Biol551-CSUN/Rukstales/tree/main/Week_2)
 * contains the first R script we wrote in class
 * contains sample data
+
+[Week_3](https://github.com/Biol551-CSUN/Rukstales/tree/main/Week_3)
+* penguin scripts and plots
