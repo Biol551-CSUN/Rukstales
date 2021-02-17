@@ -14,3 +14,4 @@ This repository is for the Spring 2021 Computer Modeling course at CSUN with Dr.
 [Week_4](https://github.com/Biol551-CSUN/Rukstales/tree/main/Week_4)
 * more penguin scripts and plots
 * dplyr package
+* tidyr package
