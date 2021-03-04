@@ -1,0 +1,151 @@
+---
+title: "RMarkdown Lab"
+author: "Emily Rukstales"
+date: "3/3/2021"
+output: 
+  html_document:
+    toc: TRUE
+    toc_float: TRUE
+    theme: journal
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+
+# Introduction  
+#### Here we will be making tables and plots with the ChemData dataset.
+
+# Load Libraries  
+
+```{r LoadLibraries}
+library(tidyverse)
+library(here)
+library(kableExtra)
+library(cowplot)
+library(calecopal)
+```
+
+
+# Load Data  
+#### Using the ChemData from Week 4  
+
+```{r LoadData}
+ChemData <- read_csv(here("Week_6", "Data", "chemicaldata_maunalua.csv"))
+```
+
+
+# Create a table  
+#### Make a table of all the variables for each site  
+  
+Calculate variable means for each site
+```{r Means}
+ChemData_summary <- ChemData %>% # store summary statistics as object
+  group_by(Site) %>% # calculate statistics for each site
+  summarise(mean_temp = mean(Temp_in, na.rm = TRUE), # calculate means of each variable
+            mean_salinity = mean(Salinity, na.rm = TRUE),
+            mean_phosphate = mean(Phosphate, na.rm = TRUE),
+            mean_silicate = mean(Silicate, na.rm = TRUE),
+            mean_NN = mean(NN, na.rm = TRUE),
+            mean_pH = mean(pH, na.rm = TRUE),
+            mean_TA = mean(TA, na.rm = TRUE),
+            mean_pctsgd = mean(percent_sgd, na.rm = TRUE)) %>%
+  mutate(mean_temp = round(mean_temp, digits = 2), # round all numbers to 2 decimal places
+         mean_salinity = round(mean_salinity, digits = 2),
+         mean_phosphate = round(mean_phosphate, digits = 2),
+         mean_silicate = round(mean_silicate, digits = 2),
+         mean_NN = round(mean_NN, digits = 2),
+         mean_pH = round(mean_pH, digits = 2),
+         mean_TA = round(mean_TA, digits = 2),
+         mean_pctsgd = round(mean_pctsgd, digits = 2)) %>%
+  rename("Nitrate + Nitrite (umol/L)" = "mean_NN", #rename variables
+         "Percent SGD" = "mean_pctsgd",
+         "Total Alkylinity (umol/L)" = "mean_TA",
+         "Temperature (C)" = "mean_temp",
+         "Phosphate (umol/L)" = "mean_phosphate",
+         "Silicate (umol/L)" = "mean_silicate",
+         "Salinity" = "mean_salinity",
+         "pH" = "mean_pH") %>%
+  mutate(Site = ifelse(Site == "BP", "Black Point", "Wailupe")) %>% # change site names inside Site column
+    pivot_longer(cols = "Temperature (C)":"Percent SGD", # pivot longer so that all variables are in 1 column
+               names_to = "Variables",
+               values_to = "Values") %>%
+  pivot_wider(names_from = "Site", # pivot wider so there there is 1 column for each site
+              values_from = "Values")
+```
+
+Create a table showing variable means for each site  
+```{r Table}
+ChemData_table <- ChemData_summary %>% # use means to create table
+  kbl() %>% # create kable
+  kable_classic(full_width = F) %>% # classic theme, width does not span entire page
+  kable_styling(fixed_thead = T) # fix row sizes
+
+ChemData_table
+```
+
+# Create a plot  
+#### Make plots of nutrients vs temperature by site  
+  
+```{r ColorPalette, include = FALSE}
+pal <- cal_palette("superbloom3", 2) # use calecopal for plot colors
+```
+  
+Plot nitrate + nitrite vs temperature
+```{r NNPlot, fig.show = 'hide'}
+NN_plot <- ChemData %>% # create plot of NN vs Temp
+  filter(complete.cases(.)) %>% # remove NA's
+  mutate(Site = ifelse(Site == "BP", "Black Point", "Wailupe")) %>% # change site names in Site column
+  ggplot(aes(x = Temp_in, # temperature on x-axis
+             y = NN, # NN on y-axis
+             color = Site)) + # color each site
+  geom_line() + # make line graph
+  theme_bw() +
+  theme(legend.position = "none", # remove legend from this plot (will show in second plot)
+        plot.margin = margin(10, 20, 20, 20)) + # put a margin around entire plot
+  scale_x_continuous(expand = c(0, 0)) + # remove extra white space inside panel
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_color_manual(values = pal) + # use color palette for lines
+  labs(x = "Temperature (C)", # change axis labels
+       y = "Nitrate + Nitrite (umol/L)",
+       title = "Nutrients vs. Temperature", # add title
+       subtitle = "Nitrate + Nitrite and Phosphates") # add subtitle
+```
+  
+Plot phosphate vs temperature
+```{r PhosphatePlot, fig.show = 'hide'}
+Phosphate_plot <- ChemData %>% # create plot of phosphate vs temp
+  filter(complete.cases(.)) %>% # remove NA's
+  mutate(Site = ifelse(Site == "BP", "Black Point", "Wailupe")) %>% # change site names in Site column
+  ggplot(aes(x = Temp_in, # temp on x-axis
+             y = Phosphate, # phosphate on y-axis
+             color = Site)) + # color each site
+  geom_line() + # make line graph
+  theme_bw() +
+  theme(plot.margin = margin(10, 20, 20, 20)) + # put a margin around entire plot
+  scale_x_continuous(expand = c(0, 0)) + # remove extra white space inside panel
+  scale_y_continuous(expand = c(0, 0)) +
+  scale_color_manual(values = pal) + # use color palette for lines
+  labs(x = "Temperature (C)", # change axis labels
+       y = "Phosphate (umol/L)",
+       title = " ",
+       subtitle = " ")
+```
+
+
+Stitch nutrients plots together using **{cowplot}** package
+```{r Cowplot, fig.width = 13, fig.height = 5, fig.align = "center", fig.path = "../Outputs/"}
+plot_grid(NN_plot, Phosphate_plot, # use {cowplot} to join two plots
+          labels = c('A', 'B'), # label each plot with a letter
+          label_size = 12, # change size of A/B labels
+          rel_widths = c(1, 1.25), # adjust widths so that panel dimensions match
+          rel_heights = c(1.2, 1), # adjust heights so that panel dimensions match
+          label_x = 0.05, # move A/B labels to the right a little
+          label_y = 0.9) # move A/B labels down
+```
+
+
+
