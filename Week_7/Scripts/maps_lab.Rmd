@@ -1,0 +1,89 @@
+---
+title: "San Francisco Trees Map Lab"
+author: "Emily Rukstales"
+date: "3/8/2021"
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE,
+                      message = FALSE,
+                      warning = FALSE)
+```
+
+
+#Introduction  
+Today we will be making a map of San Francisco trees using data from Tidy Tuesday (2020-01-28)  
+  
+  
+#Load Libraries  
+```{r}
+library(tidyverse)
+library(here)
+library(maps)
+library(mapdata)
+library(mapproj)
+```
+
+#Load Data  
+Data is from Tidy Tuesday 1/28/2020
+```{r}
+tuesdata <- tidytuesdayR::tt_load('2020-01-28') 
+sf_trees <- tuesdata$sf_trees
+```
+
+#Setting up data  
+Filter data to create map of Coast Redwood trees in SF county.
+```{r}
+counties <- map_data("county") #use county data for map
+head(counties)
+
+SF_county <- counties %>%
+  filter(subregion == "san francisco") #use only SF county
+
+SF_trees_redwood <- sf_trees %>% #use only Coast Redwood species
+  filter(latitude < 40 & #limit points to withing SF county
+         longitude > -125) %>%
+  filter(species == "Sequoia sempervirens :: Coast Redwood") %>% #filter out Coast Redwood
+  mutate(latitude = latitude - 0.0055, #adjust the latitudes and longitudes of tree data points so that trees are not in ocean
+         longitude = longitude + 0.03)
+
+
+```
+
+#Make a map of Coast Redwood trees  
+```{r}
+ggplot() +
+  geom_polygon(data = SF_county, #draw a polygon using coordinates
+               aes(x = long,
+                   y = lat,
+                   group = group),
+               color = "black", #border color
+               fill = "grey94") + #fill county color
+  geom_point(data = SF_trees_redwood,
+             aes(x = longitude,
+             y = latitude),
+             color = "palegreen3", #set point color
+             size = 2.5) + #set point size
+  guides(fill = FALSE) +
+  coord_map() +
+  theme_minimal() +
+  theme(panel.grid = element_blank(), #remove gridlines
+        panel.background = element_rect(fill = "slategray3"),
+        plot.margin = margin(10, 30, 10, 30)) + #put a margin around plot
+  labs(x = "Longitude",
+       y = "Latitude",
+       title = "Coast Redwood trees in San Francisco County") +
+  ggsave(here("Week_7", "Outputs", "SF_trees_map_lab.pdf"))
+
+```
+
+
+
+
+
+
+
