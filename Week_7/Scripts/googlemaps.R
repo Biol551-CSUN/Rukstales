@@ -16,5 +16,4 @@ ChemData <- read_csv(here("Week_7", "Data", "chemicaldata_maunalua.csv"))
 glimpse(ChemData)
 
 
-register_google(key = "AIzaSyDPzRf67AcOJwwE0cCuSOgtbLdEIyAlf5I")
-Oahu <- get_map("Oahu")
+
